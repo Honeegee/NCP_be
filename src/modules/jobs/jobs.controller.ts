@@ -18,7 +18,7 @@ export async function listJobs(req: Request, res: Response, next: NextFunction) 
 
 export async function getJob(req: Request, res: Response, next: NextFunction) {
   try {
-    const job = await jobsService.getJob(req.params.id);
+    const job = await jobsService.getJob(req.params.id as string);
     res.json({ data: job });
   } catch (err) { next(err); }
 }
@@ -32,21 +32,21 @@ export async function createJob(req: Request, res: Response, next: NextFunction)
 
 export async function updateJob(req: Request, res: Response, next: NextFunction) {
   try {
-    const job = await jobsService.updateJob(req.params.id, req.body);
+    const job = await jobsService.updateJob(req.params.id as string, req.body);
     res.json({ data: job });
   } catch (err) { next(err); }
 }
 
 export async function deleteJob(req: Request, res: Response, next: NextFunction) {
   try {
-    const job = await jobsService.deleteJob(req.params.id);
+    const job = await jobsService.deleteJob(req.params.id as string);
     res.json({ data: { message: "Job deactivated successfully", job } });
   } catch (err) { next(err); }
 }
 
 export async function permanentlyDeleteJob(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await jobsService.permanentlyDeleteJob(req.params.id);
+    const result = await jobsService.permanentlyDeleteJob(req.params.id as string);
     res.json({ data: result });
   } catch (err) { next(err); }
 }

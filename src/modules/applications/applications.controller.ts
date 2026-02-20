@@ -24,21 +24,21 @@ export async function listAllApplications(req: Request, res: Response, next: Nex
 
 export async function getApplication(req: Request, res: Response, next: NextFunction) {
   try {
-    const application = await applicationsService.getApplication(req.params.id, req.user!.id, req.user!.role);
+    const application = await applicationsService.getApplication(req.params.id as string, req.user!.id, req.user!.role);
     res.json({ data: application });
   } catch (err) { next(err); }
 }
 
 export async function applyToJob(req: Request, res: Response, next: NextFunction) {
   try {
-    const application = await applicationsService.applyToJob(req.user!.id, req.params.jobId);
+    const application = await applicationsService.applyToJob(req.user!.id, req.params.jobId as string);
     res.status(201).json({ data: application });
   } catch (err) { next(err); }
 }
 
 export async function updateStatus(req: Request, res: Response, next: NextFunction) {
   try {
-    const application = await applicationsService.updateApplicationStatus(req.params.id, req.body.status);
+    const application = await applicationsService.updateApplicationStatus(req.params.id as string, req.body.status);
     res.json({ data: application });
   } catch (err) { next(err); }
 }
