@@ -21,14 +21,14 @@ export async function getMyProfile(req: Request, res: Response, next: NextFuncti
 
 export async function getProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const profile = await nursesService.getProfileById(req.params.id, req.user!.id, req.user!.role);
+    const profile = await nursesService.getProfileById(req.params.id as string, req.user!.id, req.user!.role);
     res.json({ data: profile });
   } catch (err) { next(err); }
 }
 
 export async function updateProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const profile = await nursesService.updateProfile(req.params.id, req.user!.id, req.user!.role, req.body);
+    const profile = await nursesService.updateProfile(req.params.id as string, req.user!.id, req.user!.role, req.body);
     res.json({ data: profile });
   } catch (err) { next(err); }
 }
@@ -44,14 +44,14 @@ export async function addExperience(req: Request, res: Response, next: NextFunct
 
 export async function updateExperience(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await nursesService.updateExperience(req.user!.id, req.params.itemId, req.body);
+    const data = await nursesService.updateExperience(req.user!.id, req.params.itemId as string, req.body);
     res.json({ data });
   } catch (err) { next(err); }
 }
 
 export async function deleteExperience(req: Request, res: Response, next: NextFunction) {
   try {
-    await nursesService.deleteExperience(req.user!.id, req.params.itemId);
+    await nursesService.deleteExperience(req.user!.id, req.params.itemId as string);
     res.json({ data: { success: true } });
   } catch (err) { next(err); }
 }
@@ -74,14 +74,14 @@ export async function addEducation(req: Request, res: Response, next: NextFuncti
 
 export async function updateEducation(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await nursesService.updateEducation(req.user!.id, req.params.itemId, req.body);
+    const data = await nursesService.updateEducation(req.user!.id, req.params.itemId as string, req.body);
     res.json({ data });
   } catch (err) { next(err); }
 }
 
 export async function deleteEducation(req: Request, res: Response, next: NextFunction) {
   try {
-    await nursesService.deleteEducation(req.user!.id, req.params.itemId);
+    await nursesService.deleteEducation(req.user!.id, req.params.itemId as string);
     res.json({ data: { success: true } });
   } catch (err) { next(err); }
 }
@@ -104,14 +104,14 @@ export async function addSkill(req: Request, res: Response, next: NextFunction) 
 
 export async function updateSkill(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await nursesService.updateSkill(req.user!.id, req.params.itemId, req.body);
+    const data = await nursesService.updateSkill(req.user!.id, req.params.itemId as string, req.body);
     res.json({ data });
   } catch (err) { next(err); }
 }
 
 export async function deleteSkill(req: Request, res: Response, next: NextFunction) {
   try {
-    await nursesService.deleteSkill(req.user!.id, req.params.itemId);
+    await nursesService.deleteSkill(req.user!.id, req.params.itemId as string);
     res.json({ data: { success: true } });
   } catch (err) { next(err); }
 }
@@ -134,14 +134,14 @@ export async function addCertification(req: Request, res: Response, next: NextFu
 
 export async function updateCertification(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await nursesService.updateCertification(req.user!.id, req.params.itemId, req.body);
+    const data = await nursesService.updateCertification(req.user!.id, req.params.itemId as string, req.body);
     res.json({ data });
   } catch (err) { next(err); }
 }
 
 export async function deleteCertification(req: Request, res: Response, next: NextFunction) {
   try {
-    await nursesService.deleteCertification(req.user!.id, req.params.itemId);
+    await nursesService.deleteCertification(req.user!.id, req.params.itemId as string);
     res.json({ data: { success: true } });
   } catch (err) { next(err); }
 }
@@ -158,7 +158,7 @@ export async function clearCertifications(req: Request, res: Response, next: Nex
 export async function getNurseMatches(req: Request, res: Response, next: NextFunction) {
   try {
     const { getJobMatchesForNurse } = await import("../jobs/jobs.service");
-    const matches = await getJobMatchesForNurse(req.params.id);
+    const matches = await getJobMatchesForNurse(req.params.id as string);
     res.json({ data: matches });
   } catch (err) { next(err); }
 }

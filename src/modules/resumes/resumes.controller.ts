@@ -14,14 +14,14 @@ export async function uploadResume(req: Request, res: Response, next: NextFuncti
 
 export async function getResumeUrl(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await resumesService.getResumeUrl(req.params.id, req.user!.id, req.user!.role);
+    const result = await resumesService.getResumeUrl(req.params.id as string, req.user!.id, req.user!.role);
     res.json({ data: result });
   } catch (err) { next(err); }
 }
 
 export async function deleteResume(req: Request, res: Response, next: NextFunction) {
   try {
-    await resumesService.deleteResume(req.params.id, req.user!.id);
+    await resumesService.deleteResume(req.params.id as string, req.user!.id);
     res.json({ data: { message: "Resume deleted successfully" } });
   } catch (err) { next(err); }
 }
