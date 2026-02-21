@@ -51,4 +51,5 @@ export const env = {
   FACEBOOK_CLIENT_ID: optionalEnv("FACEBOOK_CLIENT_ID"),
   FACEBOOK_CLIENT_SECRET: optionalEnv("FACEBOOK_CLIENT_SECRET"),
   FRONTEND_URL: optionalEnv("FRONTEND_URL", "http://localhost:3000"),
+  BACKEND_URL: optionalEnv("BACKEND_URL"),
 } as const;

@@ -13,7 +13,9 @@ export interface SSOProfile {
   rawData: Record<string, unknown>;
 }
 
-const backendUrl = `http://localhost:${env.PORT}`;
+const backendUrl = env.NODE_ENV === "production"
+  ? env.BACKEND_URL || `https://${process.env.RENDER_EXTERNAL_HOSTNAME}`
+  : `http://localhost:${env.PORT}`;
 
 // Google Strategy
 if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
