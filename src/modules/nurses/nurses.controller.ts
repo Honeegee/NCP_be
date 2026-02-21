@@ -182,3 +182,12 @@ export async function deleteProfilePicture(req: Request, res: Response, next: Ne
     res.json({ data: { success: true } });
   } catch (err) { next(err); }
 }
+
+// --- Stats ---
+
+export async function getNurseStats(req: Request, res: Response, next: NextFunction) {
+  try {
+    const stats = await nursesService.getNurseStats();
+    res.json({ data: stats });
+  } catch (err) { next(err); }
+}

@@ -15,6 +15,7 @@ router.get("/me", paginate, controller.listMyApplications);
 
 // Admin: list all applications (filterable by status, job_id)
 router.get("/", requireRole("admin"), paginate, controller.listAllApplications);
+router.get("/stats", requireRole("admin"), controller.getApplicationStats);
 
 // Get single application (owner or admin)
 router.get("/:id", controller.getApplication);

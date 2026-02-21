@@ -24,6 +24,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get("/", paginate, controller.listJobs);
+router.get("/stats", requireRole("admin"), controller.getJobStats);
 router.get("/matches", controller.getMatches);
 router.get("/:id", controller.getJob);
 router.post("/", requireRole("admin"), validate(jobSchema), controller.createJob);

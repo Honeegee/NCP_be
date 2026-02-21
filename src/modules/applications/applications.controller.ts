@@ -42,3 +42,12 @@ export async function updateStatus(req: Request, res: Response, next: NextFuncti
     res.json({ data: application });
   } catch (err) { next(err); }
 }
+
+// --- Stats ---
+
+export async function getApplicationStats(req: Request, res: Response, next: NextFunction) {
+  try {
+    const stats = await applicationsService.getApplicationStats();
+    res.json({ data: stats });
+  } catch (err) { next(err); }
+}

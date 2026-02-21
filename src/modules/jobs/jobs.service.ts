@@ -269,3 +269,28 @@ export async function getJobMatches(userId: string) {
 
   return matches;
 }
+
+// --- Stats ---
+
+export async function getJobStats() {
+  const supabase = createServerSupabase();
+
+  // Get total jobs
+  const { count: totalJobs, error: totalError } = await supabase
+    .from("jobs")
+    .select("*", { count: "exact", head: true });
+  if (totalError) throw new Error(totalError.message);
+
+  // Get active jobs (is_active = true)
+  const { count: activeJobs, error: activeError } = await supabase
+    .from("jobs")
+    .select("*", { count: "exact", head: true })
+    .eq("is_active", true);
+  if (activeError) throw new Error(activeError.message);
+
+  return {
+    totalJobs: totalJobs || 0,
+    activeJobs: activeJobs || 0,
+    inactiveJobs: (totalJobs || 0) - (activeJobs || 0),
+  };
+}

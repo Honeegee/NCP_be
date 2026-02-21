@@ -68,3 +68,12 @@ export async function getMatches(req: Request, res: Response, next: NextFunction
     res.json({ data: matches });
   } catch (err) { next(err); }
 }
+
+// --- Stats ---
+
+export async function getJobStats(req: Request, res: Response, next: NextFunction) {
+  try {
+    const stats = await jobsService.getJobStats();
+    res.json({ data: stats });
+  } catch (err) { next(err); }
+}

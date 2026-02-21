@@ -66,7 +66,7 @@ export async function recalculateYearsOfExperience(
  */
 export const NURSE_FULL_PROFILE_SELECT = `
   *,
-  user:users(email, role),
+  user:users(email, role, created_at),
   experience:nurse_experience(*),
   certifications:nurse_certifications(*),
   education:nurse_education(*),

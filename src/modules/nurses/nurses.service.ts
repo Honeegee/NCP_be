@@ -230,6 +230,7 @@ export async function uploadProfilePicture(userId: string, file: Express.Multer.
 
   const ext = file.originalname.split(".").pop() || "jpg";
   const path = `${userId}/profile.${ext}`;
+  const timestamp = Date.now();
 
   const { error: uploadErr } = await repo.uploadProfilePicture(
     "profile-pictures",
@@ -250,18 +251,22 @@ export async function uploadProfilePicture(userId: string, file: Express.Multer.
     if (fallbackErr) throw new Error("Failed to upload profile picture");
 
     const { data: urlData } = await repo.getPublicUrl("resumes", fallbackPath);
-    await repo.updateProfile(nurseId, { profile_picture_url: urlData.publicUrl } as Record<string, unknown>);
-    return urlData.publicUrl;
+    // Add cache-busting query parameter
+    const cachedUrl = `${urlData.publicUrl}?t=${timestamp}`;
+    await repo.updateProfile(nurseId, { profile_picture_url: cachedUrl } as Record<string, unknown>);
+    return cachedUrl;
   }
 
   const { data: urlData } = await repo.getPublicUrl("profile-pictures", path);
   const supabase = createServerSupabase();
+  // Add cache-busting query parameter to ensure browser loads new image
+  const cachedUrl = `${urlData.publicUrl}?t=${timestamp}`;
   await supabase
     .from("nurse_profiles")
-    .update({ profile_picture_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+    .update({ profile_picture_url: cachedUrl, updated_at: new Date().toISOString() })
     .eq("id", nurseId);
 
-  return urlData.publicUrl;
+  return cachedUrl;
 }
 
 export async function deleteProfilePicture(userId: string) {
@@ -270,8 +275,96 @@ export async function deleteProfilePicture(userId: string) {
   const nurseId = await repo.getNurseId(userId);
   if (!nurseId) throw new NotFoundError("Profile not found");
 
+  // Get the current profile to find the storage path
+  const { data: profile } = await supabase
+    .from("nurse_profiles")
+    .select("profile_picture_url")
+    .eq("id", nurseId)
+    .single();
+
+  if (profile?.profile_picture_url) {
+    // Try to delete from profile-pictures bucket
+    const path = `${userId}/profile.`;
+    await repo.deleteStorageFile("profile-pictures", [path + "jpg", path + "jpeg", path + "png", path + "gif", path + "webp"]).catch(() => {
+      // Ignore errors - file might not exist
+    });
+    
+    // Try to delete from resumes bucket (fallback)
+    const fallbackPath = `profile-images/${userId}/profile.`;
+    await repo.deleteStorageFile("resumes", [fallbackPath + "jpg", fallbackPath + "jpeg", fallbackPath + "png", fallbackPath + "gif", fallbackPath + "webp"]).catch(() => {
+      // Ignore errors - file might not exist
+    });
+  }
+
   await supabase
     .from("nurse_profiles")
     .update({ profile_picture_url: null, updated_at: new Date().toISOString() })
     .eq("id", nurseId);
+}
+
+// --- Stats ---
+
+export async function getNurseStats() {
+  const supabase = createServerSupabase();
+  
+  // Get total nurses
+  const { count: totalNurses, error: totalError } = await supabase
+    .from("nurse_profiles")
+    .select("*", { count: "exact", head: true });
+  if (totalError) throw new Error(totalError.message);
+
+  // Get complete profiles (profile_complete = true)
+  const { count: completeProfiles, error: completeError } = await supabase
+    .from("nurse_profiles")
+    .select("*", { count: "exact", head: true })
+    .eq("profile_complete", true);
+  if (completeError) throw new Error(completeError.message);
+
+  // Get registrations for last 7 days - fetch all nurse profiles to get user_id
+  const { data: nurseProfiles, error: profilesError } = await supabase
+    .from("nurse_profiles")
+    .select("user_id");
+  if (profilesError) throw new Error(profilesError.message);
+
+  // Extract user IDs
+  const userIds = nurseProfiles?.map((p) => p.user_id).filter(Boolean) || [];
+
+  // Get user creation dates
+  let userCreatedAtMap: Record<string, string> = {};
+  if (userIds.length > 0) {
+    const { data: users, error: usersError } = await supabase
+      .from("users")
+      .select("id, created_at")
+      .in("id", userIds);
+    if (usersError) throw new Error(usersError.message);
+    
+    users?.forEach((user) => {
+      userCreatedAtMap[user.id] = user.created_at;
+    });
+  }
+
+  // Process registrations per day
+  const registrationsPerDay: { date: string; count: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    registrationsPerDay.push({ date: dateStr, count: 0 });
+  }
+
+  nurseProfiles?.forEach((profile) => {
+    const createdAt = userCreatedAtMap[profile.user_id];
+    if (createdAt) {
+      const day = new Date(createdAt).toISOString().slice(0, 10);
+      const slot = registrationsPerDay.find((d) => d.date === day);
+      if (slot) slot.count++;
+    }
+  });
+
+  return {
+    totalNurses: totalNurses || 0,
+    completeProfiles: completeProfiles || 0,
+    incompleteProfiles: (totalNurses || 0) - (completeProfiles || 0),
+    registrationsPerDay,
+  };
 }

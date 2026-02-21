@@ -28,6 +28,7 @@ router.use(authenticate);
 
 // --- Profile ---
 router.get("/", requireRole("admin"), paginate, controller.listNurses);
+router.get("/stats", requireRole("admin"), controller.getNurseStats);
 router.get("/me", controller.getMyProfile);
 router.get("/:id/matches", requireRole("admin"), controller.getNurseMatches);
 router.get("/:id", controller.getProfile);

@@ -75,3 +75,39 @@ export async function updateApplicationStatus(id: string, status: string) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+// --- Stats ---
+
+export async function getApplicationStats() {
+  const supabase = createServerSupabase();
+
+  // Get total applications
+  const { count: totalApplications, error: totalError } = await supabase
+    .from("job_applications")
+    .select("*", { count: "exact", head: true });
+  if (totalError) throw new Error(totalError.message);
+
+  // Get applications by status
+  const { data: statusCounts, error: statusError } = await supabase
+    .from("job_applications")
+    .select("status");
+  if (statusError) throw new Error(statusError.message);
+
+  const counts = {
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  };
+
+  statusCounts?.forEach((app) => {
+    const status = app.status as keyof typeof counts;
+    if (counts[status] !== undefined) {
+      counts[status]++;
+    }
+  });
+
+  return {
+    totalApplications: totalApplications || 0,
+    ...counts,
+  };
+}
